@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Build Your Own Resume</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="/static/js/jquery1.9.1.min.js"></script>
+	<!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="/static/js/bootstrap.min.js"></script>
+	<link href="/static/css/5.css" rel="stylesheet" type="text/css">
+	<!--<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+	<script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>--> 
+	<!-- 
+	<link rel="stylesheet" type="text/css" href="htmleaf-demo.css">
+	<link rel="stylesheet" type="text/css" href="style.css"> -->
+	<!--[if IE]>
+		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+	<![endif]-->
+</head>
+  <body>
+  <div class="wrapper">
+  		<!--头部导航条显示-->
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="container-fluid ">
+			    <div class="navbar-header">
+			        <a class="navbar-brand" href="#"><img src="http://www.stocksy.com/dist/images/logoStocksy.svg?daab401b709b0b4f6e7a"></a>
+					<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target="#example-navbar-collapse">
+						<span class="sr-only">切换导航</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+			    </div>
+
+			    <div class="collapse navbar-collapse" id="example-navbar-collapse">
+			    	<!-- <form class="navbar-form navbar-left collapse navbar-collapse" role="search">
+			            <div class="form-group">
+			                <input type="text" class="form-control" placeholder="Search">
+			            </div>
+			            <button type="submit" class="btn btn-default">提交</button>
+		        	</form> -->
+
+			        <ul class="nav navbar-nav navbar-right">
+			           <li class="dropdown active">
+			                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+			                   <span class="glyphicon glyphicon-shopping-cart"></span> Cart <b class="caret"></b>
+			                </a>
+			                <ul class="dropdown-menu">
+			                    <li><a href="#">jmeter</a></li>
+			                    <li><a href="#">EJB</a></li>
+			                    <li><a href="#">Jasper Report</a></li>
+			                    <li class="divider"></li>
+			                    <li><a href="#">分离的链接</a></li>
+			                    <li class="divider"></li>
+			                    <li><a href="#">另一个分离的链接</a></li>
+			                </ul>
+			            </li>
+			            <li ><a href="#">Support</a></li>
+			            <li><a href="#">Login</a></li>
+			            <li><a href="#">Sign Up</a></li>
+			        </ul>
+			    </div>
+	    	</div>
+		</nav>
+
+		<div class="startshow">
+		<!--H5 背景展示-->
+		<canvas id="canvas" class="starshow"></canvas>
+			<script type="text/javascript">
+		     $(function(){
+		       //var canvas = document.querySelector('canvas'),
+		       var canvas = $('.starshow')[0];
+		       ctx = canvas.getContext('2d');
+		       canvas.width = window.innerWidth;
+		       canvas.height = window.innerHeight;
+				
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				// objects
+
+		       //显得宽度为0.3
+		       ctx.lineWidth = 0.3;
+		       //生成随机的颜色
+		       ctx.strokeStyle = (new Color(150)).style;
+
+		       var mousePosition = {
+		         //初始化鼠标位置点，不明白为啥不直接写/2
+		         x: 50 * canvas.width / 100,
+		         y: 50 * canvas.height / 100
+		       };
+
+		       var dots = {
+		         //点的个数
+		         nb: 250,
+		         //两点间最大距离的平方除以2再开方，就是就是一个筛选值
+		         distance: 100,
+		         //鼠标有效半径
+		         d_radius: 150,
+		         //小球数组
+		         array: []
+		       };
+
+		     //rgb的色值介于0-255之间
+		       function colorValue(min) {
+		         return Math.floor(Math.random() * 255 + min);
+		       }
+
+		       function createColorStyle(r,g,b) {
+		         return 'rgba(' + r + ',' + g + ',' + b + ', 0.9)';
+		       }
+
+		       //此处高能开始，一开始以为只是去两个颜色的中间值，没想到连直径的比例也加上去了
+		       function mixComponents(comp1, weight1, comp2, weight2) {
+		         return (comp1 * weight1 + comp2 * weight2) / (weight1 + weight2);
+		       }
+
+		     //用于返回连线的颜色
+		       function averageColorStyles(dot1, dot2) {
+		         //获取两点的颜色
+		         var color1 = dot1.color,
+		             color2 = dot2.color;
+
+		         var r = mixComponents(color1.r, dot1.radius, color2.r, dot2.radius),
+		             g = mixComponents(color1.g, dot1.radius, color2.g, dot2.radius),
+		             b = mixComponents(color1.b, dot1.radius, color2.b, dot2.radius);
+		         return createColorStyle(Math.floor(r), Math.floor(g), Math.floor(b));
+		       }
+
+		     //随机颜色生成器，这个写的挺神的
+		       function Color(min) {
+		         min = min || 0;
+		         this.r = colorValue(min);
+		         this.g = colorValue(min);
+		         this.b = colorValue(min);
+		         this.style = createColorStyle(this.r, this.g, this.b);
+		       }
+
+		     //生成一个点
+		       function Dot(){
+		         //点产生在页面的随机位置处
+		         this.x = Math.random() * canvas.width;
+		         this.y = Math.random() * canvas.height;
+		           //设定x和y轴的运动速度
+		         this.vx = -.5 + Math.random();
+		         this.vy = -.5 + Math.random();
+		         //直径大小，也是随机的
+		         this.radius = Math.random() * 2;
+		         //随机的颜色
+		         this.color = new Color();
+		         // console.log(this);
+		       }
+
+		     //原型上加绘制函数
+		       Dot.prototype = {
+		         //绘制小点的方法
+		         draw: function(){
+		           ctx.beginPath();
+		           ctx.fillStyle = this.color.style;
+		           ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+		           ctx.fill();
+		         }
+		       };
+
+		     //创建了一个点的集合
+		       function createDots(){
+		         for(i = 0; i < dots.nb; i++){
+		           dots.array.push(new Dot());
+		         }
+		       }
+
+		     //碰撞检测函数
+		       function moveDots() {
+		         for(i = 0; i < dots.nb; i++){
+
+		           var dot = dots.array[i];
+
+		           if(dot.y < 0 || dot.y > canvas.height){
+		             dot.vx = dot.vx;
+		             dot.vy = - dot.vy;
+		           }
+		           else if(dot.x < 0 || dot.x > canvas.width){
+		             dot.vx = - dot.vx;
+		             dot.vy = dot.vy;
+		           }
+		           dot.x += dot.vx;
+		           dot.y += dot.vy;
+		         }
+		       }
+
+		     // 遍历点的数组，将满足的条件的两个点进行连线
+		       function connectDots() {
+		         for(i = 0; i < dots.nb; i++){
+		           for(j = 0; j < dots.nb; j++){
+		             i_dot = dots.array[i];
+		             j_dot = dots.array[j];
+		             //假设当前点距离和遍历的点的距离小于所定义的半径长度（其实为distance的平方乘以二再开方，三角函数），这两个判断到时大家可以重新研究一下谁在上谁在下，以做到算法最优化
+		             if((i_dot.x - j_dot.x) < dots.distance && (i_dot.y - j_dot.y) < dots.distance && (i_dot.x - j_dot.x) > - dots.distance && (i_dot.y - j_dot.y) > - dots.distance){
+		               //用来筛选处于鼠标所在点设定值半径内的所欲点
+		               if((i_dot.x - mousePosition.x) < dots.d_radius && (i_dot.y - mousePosition.y) < dots.d_radius && (i_dot.x - mousePosition.x) > - dots.d_radius && (i_dot.y - mousePosition.y) > - dots.d_radius){
+		                 ctx.beginPath();
+		                 //之前最好奇的就是线的渐变是怎么做的，看完顿时感觉，很高能
+		                 ctx.strokeStyle = averageColorStyles(i_dot, j_dot);
+		                 ctx.moveTo(i_dot.x, i_dot.y);
+		                 ctx.lineTo(j_dot.x, j_dot.y);
+		                 ctx.stroke();
+		                 ctx.closePath();
+		               }
+		             }
+		           }
+		         }
+		       }
+
+		     //数组中的所有小球，进行绘制
+		       function drawDots() {
+		         for(i = 0; i < dots.nb; i++){
+		           var dot = dots.array[i];
+		           dot.draw();
+		         }
+		       }
+
+		     //比定时器更加准确，跟着浏览器的渲染频率走
+		       function animateDots() {
+		         //清空画布,并且重新绘制，然后执行定时器，循环绘制
+		         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		         moveDots();
+
+		         connectDots();
+
+		         drawDots();
+
+		         requestAnimationFrame(animateDots);
+		       }
+
+		     // 监听鼠标移动
+		       $('.starshow').on('mousemove', function(e){
+		         mousePosition.x = e.pageX;
+		         mousePosition.y = e.pageY;
+		       });
+
+		     //鼠标移除，再次将默认位置重置为中心区域
+		       $('.starshow').on('mouseleave', function(e){
+		         mousePosition.x = canvas.width / 2;
+		         mousePosition.y = canvas.height / 2;
+		       });
+
+		       // 创建点集合
+		       createDots();
+		       //其实用定时器是一样的，准确率差不了多少，估计作者想使用新技术，又或是本身是一个强迫症患者
+		       requestAnimationFrame(animateDots);
+		     });
+
+		     </script>
+		<!--H5 show over-->
+		</div>
+
+		<div class="fireshow">
+		<!-- <div class="container"> -->
+			<canvas class="wcanvas"></canvas>
+			<script type="text/javascript">
+				$(function() {
+					var canvas = $('.wcanvas')[0];
+					canvas.width = $(window).width();
+					canvas.height = $(window).height();
+					var ctx = canvas.getContext('2d');
+
+					// init
+					ctx.fillStyle = '#000';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					// objects
+					var listFire = [];
+					var listFirework = [];
+					var fireNumber = 20;
+					
+					//alert(canvas.width / 2 + '---'+ canvas.height / 2);
+					var center = { x: canvas.width / 9, y: canvas.height / 2 };
+					var range = 100;
+					for (var i = 0; i < fireNumber; i++) {
+						var fire = {
+							x: Math.random() * range / 2 - range / 4 + center.x + i * 100,
+							y: Math.random() * range * 2 + canvas.height,
+							size: Math.random() + 0.5,
+							fill: '#fd1',
+							vx: Math.random() - 0.5,
+							vy: -(Math.random() + 4),
+							ax: Math.random() * 0.02 - 0.01,
+							far: Math.random() * range + (center.y - range)
+						};
+
+						fire.base = {
+							x: fire.x,
+							y: fire.y,
+							vx: fire.vx
+						};
+						//
+						listFire.push(fire);
+					}
+
+					function randColor() {
+						var r = Math.floor(Math.random() * 256);
+						var g = Math.floor(Math.random() * 256);
+						var b = Math.floor(Math.random() * 256);
+						var color = 'rgb($r, $g, $b)';
+						color = color.replace('$r', r);
+						color = color.replace('$g', g);
+						color = color.replace('$b', b);
+						return color;
+					}
+
+					(function loop() {
+						requestAnimationFrame(loop);
+						update();
+						draw();
+					})();
+
+					function update() {
+						for (var i = 0; i < listFire.length; i++) {
+							var fire = listFire[i];
+							//
+							if (fire.y <= fire.far) {
+								// case add firework
+								var color = randColor();
+								for (var i = 0; i < fireNumber * 5; i++) {
+									var firework = {
+										x: fire.x,
+										y: fire.y,
+										size: Math.random() + 1.5,
+										fill: color,
+										vx: Math.random() * 5 - 2.5,
+										vy: Math.random() * -5 + 1.5,
+										ay: 0.05,
+										alpha: 1,
+										life: Math.round(Math.random() * range / 2) + range / 2
+									};
+									firework.base = {
+										life: firework.life,
+										size: firework.size
+									};
+									listFirework.push(firework);
+								}
+								// reset
+								fire.y = fire.base.y;
+								fire.x = fire.base.x;
+								fire.vx = fire.base.vx;
+								fire.ax = Math.random() * 0.02 - 0.01;
+							}
+							//
+							fire.x += fire.vx;
+							fire.y += fire.vy;
+							fire.vx += fire.ax;
+						}
+
+						for (var i = listFirework.length - 1; i >= 0; i--) {
+							var firework = listFirework[i];
+							if (firework) {
+								firework.x += firework.vx;
+								firework.y += firework.vy;
+								firework.vy += firework.ay;
+								firework.alpha = firework.life / firework.base.life;
+								firework.size = firework.alpha * firework.base.size;
+								firework.alpha = firework.alpha > 0.6 ? 1 : firework.alpha;
+								//
+								firework.life--;
+								if (firework.life <= 0) {
+									listFirework.splice(i, 1);
+								}
+							}
+						}
+					}
+
+					function draw() {
+						// clear
+						ctx.globalCompositeOperation = 'source-over';
+						ctx.globalAlpha = 0.18;
+						ctx.fillStyle = '#000';
+						ctx.fillRect(0, 0, canvas.width, canvas.height);
+						// re-draw
+						ctx.globalCompositeOperation = 'screen';
+						ctx.globalAlpha = 1;
+						for (var i = 0; i < listFire.length; i++) {
+							var fire = listFire[i];
+							ctx.beginPath();
+							ctx.arc(fire.x, fire.y, fire.size, 0, Math.PI * 2);
+							ctx.closePath();
+							ctx.fillStyle = fire.fill;
+							ctx.fill();
+						}
+						for (var i = 0; i < listFirework.length; i++) {
+							var firework = listFirework[i];
+							ctx.globalAlpha = firework.alpha;
+							ctx.beginPath();
+							ctx.arc(firework.x, firework.y, firework.size, 0, Math.PI * 2);
+							ctx.closePath();
+							ctx.fillStyle = firework.fill;
+							ctx.fill();
+						}
+					}
+				})
+			</script>
+		<!--烟花展示over-->
+		</div>
+		
+		<!--瀑布流 start-->
+		<?php if(count($list)>0) {?>
+		<section id="gallery-wrapper">
+			<?php for($i=0;$i<count($list);$i++){?>
+			<article class="white-panel">
+				<img src="<?php echo 'static'.DS.$list[$i]; ?>" class="thumb">
+				<h1><a href="#">Title <?php echo ($i+1);?></a></h1>
+		  		<p>Description <?php echo ($i+1); ?></p>
+			</article>
+			<?php } ?>
+		</section>
+		<!--<script src="http://libs.useso.com/js/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>-->
+		<!--<script>window.jQuery || document.write('<script src="js/jquery-1.11.0.min.js"><\/script>')</script>-->
+		<script src="/static/js/pinterest_grid.js"></script>
+		<script src="/static/js/jquery.waterfall.js"></script>
+		<script type="text/javascript">
+		$(function(){
+			$("#gallery-wrapper").pinterest_grid({
+			no_columns: 4,
+			padding_x: 10,
+			padding_y: 10,
+			margin_bottom: 50,
+			single_column_breakpoint: 700
+			});
+		});
+		</script>
+		
+		<script>
+		// $("#gallery-wrapper").waterfall({
+		// 	alert('RRRR');
+
+		    // itemClass: ".white-panel",
+		    // minColCount: 2,
+		    // spacingHeight: 10,
+		    // resizeable: true,
+		    // ajaxCallback: function(success, end) {
+		    // 	alert('GYGY');
+
+		    //     var data = {"data": [
+		    //         { "src": "03.jpg" }, { "src": "04.jpg" }, { "src": "02.jpg" }, { "src": "05.jpg" }, { "src": "01.jpg" }, { "src": "06.jpg" }
+		    //     ]};
+		    //     var str = "";
+		    //     var templ = '<div class="white-panel" style="opacity:0;filter:alpha(opacity=0);"><div class="pic"><img src="/static/img/{{src}}" /></div></div>'
+
+		    //     for(var i = 0; i < data.data.length; i++) {
+		    //         str += templ.replace("{{src}}", data.data[i].src);
+		    //     }
+		    //     $(str).appendTo($("#gallery-wrapper"));
+		    //     success();
+		    //     end();
+		    // }
+		// });
+		</script>
+
+
+		<?php } ?>
+		<!--瀑布流 over-->
+		
+	</div>
+</body>
+</html>
